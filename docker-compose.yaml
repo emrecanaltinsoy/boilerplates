@@ -17,7 +17,7 @@ services:
         volumes:
             - dbdata:/var/lib/mysql
 
-    web:
+    mlflow:
         restart: always
         build: ./mlflow
         image: mlflow_server
@@ -43,7 +43,14 @@ services:
         networks:
             - frontend
         depends_on:
-            - web
+            - mlflow
+        environment:
+            - MLFLOW_USERNAME=${MLFLOW_USERNAME}
+            - MLFLOW_PASSWORD=${MLFLOW_PASSWORD}
+        command: /bin/sh -c "
+            htpasswd -b -c /etc/nginx/.htpasswd ${MLFLOW_USERNAME} ${MLFLOW_PASSWORD}
+            && nginx -g 'daemon off;'"
+
 
 networks:
     frontend:
