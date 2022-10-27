@@ -1,0 +1,16 @@
+version: "2.1"
+services:
+  guacamole:
+    image: oznu/guacamole:armhf
+    networks:
+      - homelab
+    container_name: guacamole
+    volumes:
+      - ${CONFIG_PATH}:/config
+    ports:
+      - ${PORT}:8080
+    restart: unless-stopped
+
+networks:
+  homelab:
+    external: true

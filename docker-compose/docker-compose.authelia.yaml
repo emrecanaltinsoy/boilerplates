@@ -1,0 +1,18 @@
+version: "2.1"
+services:
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    networks:
+      - homelab
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}:/config
+    ports:
+      - ${PORT}:9091
+    restart: unless-stopped
+
+networks:
+  homelab:
+    external: true

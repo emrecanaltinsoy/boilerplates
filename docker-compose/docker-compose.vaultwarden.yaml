@@ -1,0 +1,17 @@
+
+version: "2.1"
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    networks:
+      - homelab
+    volumes:
+      - ${DATA_PATH}:/data/
+    ports:
+      - ${PORT}:80
+    restart: unless-stopped
+
+networks:
+  homelab:
+    external: true

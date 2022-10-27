@@ -1,0 +1,19 @@
+version: '3'
+services:
+  app:
+    container_name: 'nginxproxymanager'
+    networks:
+      - homelab
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - ${HTTP_PORT}:80
+      - ${PORT}:81
+      - ${HTTPS_PORT}:443
+    volumes:
+      - ${DATA_PATH}:/data
+      - ${LETS_ENCRYPT_PATH}:/etc/letsencrypt
+
+networks:
+  homelab:
+    external: true

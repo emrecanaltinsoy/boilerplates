@@ -1,0 +1,19 @@
+version: "2.1"
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    networks:
+      - homelab
+    volumes:
+      - ${DATA_PATH}:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - ${HTTP_PORT}:8000
+      - ${HTTPS_PORT}:9443
+    restart: always
+
+networks:
+  homelab:
+    external: true
+
