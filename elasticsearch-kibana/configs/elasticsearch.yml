@@ -1,0 +1,7 @@
+http.host: 0.0.0.0
+node.name: elasticsearch
+# transport.type: local
+# script.painless.regex.enabled: true
+xpack.security.enabled: true
+discovery.type: single-node
+path.repo: ['/usr/share/elasticsearch/data/backup']

@@ -1,0 +1,62 @@
+version: "3.3"
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.3
+    container_name: elasticsearch
+    command: >
+      /bin/sh -c "./bin/elasticsearch-plugin list | grep -q repository-s3 \
+      || yes | ./bin/elasticsearch-plugin install --silent repository-s3;
+      /usr/local/bin/docker-entrypoint.sh elasticsearch"
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+      - ./configs/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - elastic-kibana
+    healthcheck:
+      test: curl -s http://elasticsearch:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.4.3
+    container_name: kibana
+    depends_on: {"elasticsearch": {"condition": "service_healthy"}}
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+    volumes:
+      - './configs/kibana.yml:/usr/share/kibana/config/kibana.yml:ro'
+    networks:
+      - elastic-kibana
+
+  elastic-kibana-proxy:
+    container_name: elastic-kibana-proxy
+    image: nginx:stable-alpine
+    restart: always
+    links:
+        - elasticsearch
+        - kibana
+    depends_on:
+        - elasticsearch
+        - kibana
+    ports:
+        - '80:80'
+    volumes:
+        - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./proxy/template:/usr/share/nginx/html:ro
+        # - ./proxy/.htpasswd:/etc/nginx/.htpasswd:ro
+    networks:
+        - elastic-kibana
+
+volumes:
+  elastic-data:
+    driver: local
+
+networks:
+  elastic-kibana:
+    driver: bridge
